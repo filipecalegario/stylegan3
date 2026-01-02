@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+venv/
+env/
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# Models and outputs
+models/
+results/
+out/
+*.pkl
+
+# Screenshots and temp files
+_screenshots/
+
+# Claude
+.claude/
