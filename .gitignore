@@ -17,6 +17,7 @@ env/
 models/
 results/
 out/
+exports/
 *.pkl
 
 # Screenshots and temp files
