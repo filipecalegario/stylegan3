@@ -19,17 +19,24 @@ from . import bias_act
 #----------------------------------------------------------------------------
 
 _plugin = None
+_init_failed = False
 
 def _init():
-    global _plugin
+    global _plugin, _init_failed
+    if _init_failed:
+        return False
     if _plugin is None:
-        _plugin = custom_ops.get_plugin(
-            module_name='filtered_lrelu_plugin',
-            sources=['filtered_lrelu.cpp', 'filtered_lrelu_wr.cu', 'filtered_lrelu_rd.cu', 'filtered_lrelu_ns.cu'],
-            headers=['filtered_lrelu.h', 'filtered_lrelu.cu'],
-            source_dir=os.path.dirname(__file__),
-            extra_cuda_cflags=['--use_fast_math', '--allow-unsupported-compiler'],
-        )
+        try:
+            _plugin = custom_ops.get_plugin(
+                module_name='filtered_lrelu_plugin',
+                sources=['filtered_lrelu.cpp', 'filtered_lrelu_wr.cu', 'filtered_lrelu_rd.cu', 'filtered_lrelu_ns.cu'],
+                headers=['filtered_lrelu.h', 'filtered_lrelu.cu'],
+                source_dir=os.path.dirname(__file__),
+                extra_cuda_cflags=['--use_fast_math', '--allow-unsupported-compiler'],
+            )
+        except Exception:
+            _init_failed = True
+            return False
     return True
 
 def _get_filter_size(f):

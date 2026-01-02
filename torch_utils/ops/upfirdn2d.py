@@ -19,17 +19,24 @@ from . import conv2d_gradfix
 #----------------------------------------------------------------------------
 
 _plugin = None
+_init_failed = False
 
 def _init():
-    global _plugin
+    global _plugin, _init_failed
+    if _init_failed:
+        return False
     if _plugin is None:
-        _plugin = custom_ops.get_plugin(
-            module_name='upfirdn2d_plugin',
-            sources=['upfirdn2d.cpp', 'upfirdn2d.cu'],
-            headers=['upfirdn2d.h'],
-            source_dir=os.path.dirname(__file__),
-            extra_cuda_cflags=['--use_fast_math', '--allow-unsupported-compiler'],
-        )
+        try:
+            _plugin = custom_ops.get_plugin(
+                module_name='upfirdn2d_plugin',
+                sources=['upfirdn2d.cpp', 'upfirdn2d.cu'],
+                headers=['upfirdn2d.h'],
+                source_dir=os.path.dirname(__file__),
+                extra_cuda_cflags=['--use_fast_math', '--allow-unsupported-compiler'],
+            )
+        except Exception:
+            _init_failed = True
+            return False
     return True
 
 def _parse_scaling(scaling):

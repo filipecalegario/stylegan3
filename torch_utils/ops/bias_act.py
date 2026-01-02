@@ -34,17 +34,24 @@ activation_funcs = {
 
 _plugin = None
 _null_tensor = torch.empty([0])
+_init_failed = False
 
 def _init():
-    global _plugin
+    global _plugin, _init_failed
+    if _init_failed:
+        return False
     if _plugin is None:
-        _plugin = custom_ops.get_plugin(
-            module_name='bias_act_plugin',
-            sources=['bias_act.cpp', 'bias_act.cu'],
-            headers=['bias_act.h'],
-            source_dir=os.path.dirname(__file__),
-            extra_cuda_cflags=['--use_fast_math', '--allow-unsupported-compiler'],
-        )
+        try:
+            _plugin = custom_ops.get_plugin(
+                module_name='bias_act_plugin',
+                sources=['bias_act.cpp', 'bias_act.cu'],
+                headers=['bias_act.h'],
+                source_dir=os.path.dirname(__file__),
+                extra_cuda_cflags=['--use_fast_math', '--allow-unsupported-compiler'],
+            )
+        except Exception:
+            _init_failed = True
+            return False
     return True
 
 #----------------------------------------------------------------------------
