@@ -1,0 +1,102 @@
+.generation-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: #1a1a2e;
+  border-radius: 12px;
+  margin: 16px 0;
+}
+
+.generation-info {
+  display: flex;
+  gap: 32px;
+}
+
+.generation-counter,
+.population-size {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.generation-info .label {
+  font-size: 12px;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.generation-info .value {
+  font-size: 32px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.control-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.evolve-button,
+.reset-button {
+  padding: 12px 32px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.evolve-button {
+  background: linear-gradient(135deg, #4a9eff, #2a6eb8);
+  color: #fff;
+}
+
+.evolve-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #5aafff, #3a7ec8);
+  transform: translateY(-2px);
+}
+
+.evolve-button:disabled {
+  background: #333;
+  color: #666;
+  cursor: not-allowed;
+}
+
+.reset-button {
+  background: #2a2a3e;
+  color: #fff;
+  border: 1px solid #444;
+}
+
+.reset-button:hover:not(:disabled) {
+  background: #3a3a4e;
+}
+
+.reset-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+  .generation-controls {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .generation-info {
+    width: 100%;
+    justify-content: space-around;
+  }
+
+  .control-buttons {
+    width: 100%;
+  }
+
+  .evolve-button,
+  .reset-button {
+    flex: 1;
+  }
+}

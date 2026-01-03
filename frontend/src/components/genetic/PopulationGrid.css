@@ -1,0 +1,20 @@
+.population-grid {
+  display: grid;
+  gap: 16px;
+  padding: 16px;
+  max-width: 100%;
+}
+
+@media (max-width: 768px) {
+  .population-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .population-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px;
+  }
+}

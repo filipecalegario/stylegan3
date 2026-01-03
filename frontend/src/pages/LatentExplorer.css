@@ -1,0 +1,47 @@
+.latent-explorer {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.latent-explorer .header {
+  background: #16213e;
+  padding: 1rem 2rem;
+  border-bottom: 1px solid #0f3460;
+}
+
+.latent-explorer .header h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #e94560;
+}
+
+.latent-explorer .main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.latent-explorer .sidebar {
+  width: 320px;
+  background: #16213e;
+  padding: 1.5rem;
+  overflow-y: auto;
+  border-right: 1px solid #0f3460;
+}
+
+.latent-explorer .content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #0f0f1a;
+}
+
+.latent-explorer .placeholder {
+  color: #666;
+  text-align: center;
+  padding: 2rem;
+}

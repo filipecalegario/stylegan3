@@ -19,9 +19,42 @@ import uvicorn
 
 import dnnlib
 import legacy
+from genetic_engine import GeneticEngine
+from pydantic import BaseModel
+from typing import Dict, List, Optional
+
+
+# Pydantic models for genetic algorithm endpoints
+class GeneticInitRequest(BaseModel):
+    model: str
+    population_size: int = 9
+    seed: Optional[int] = None
+    image_size: int = 256
+
+
+class GeneticEvolveRequest(BaseModel):
+    fitness: Dict[str, float]
+
+
+class GeneticConfigRequest(BaseModel):
+    crossover_enabled: Optional[bool] = None
+    crossover_method: Optional[str] = None
+    mutation_enabled: Optional[bool] = None
+    mutation_rate: Optional[float] = None
+    mutation_strength: Optional[float] = None
+    elitism_count: Optional[int] = None
+    selection_method: Optional[str] = None
+    image_size: Optional[int] = None
+
+
+class GeneticExportRequest(BaseModel):
+    individual_id: str
 
 
 app = FastAPI(title="StyleGAN3 Latent Space Explorer API")
+
+# Global genetic engine instance
+_genetic_engine: Optional[GeneticEngine] = None
 
 # CORS for React dev server
 app.add_middleware(
@@ -286,6 +319,90 @@ async def websocket_generate(websocket: WebSocket):
 
     except WebSocketDisconnect:
         print("WebSocket disconnected")
+
+
+# ============ Genetic Algorithm Endpoints ============
+
+@app.post("/api/genetic/init")
+async def genetic_init(request: GeneticInitRequest):
+    """Initialize a new population for the genetic algorithm."""
+    global _genetic_engine
+
+    model_path = os.path.join('models', request.model)
+    _genetic_engine = GeneticEngine(model_path)
+
+    # Set image size before generating
+    _genetic_engine.update_config({'image_size': request.image_size})
+
+    population = _genetic_engine.initialize_population(
+        size=request.population_size,
+        seed=request.seed
+    )
+
+    return _genetic_engine.get_population_state()
+
+
+@app.get("/api/genetic/population")
+async def genetic_population():
+    """Get the current population state."""
+    global _genetic_engine
+
+    if _genetic_engine is None:
+        return {"error": "Genetic engine not initialized"}, 400
+
+    return _genetic_engine.get_population_state()
+
+
+@app.post("/api/genetic/evolve")
+async def genetic_evolve(request: GeneticEvolveRequest):
+    """Evolve to the next generation based on fitness values."""
+    global _genetic_engine
+
+    if _genetic_engine is None:
+        return {"error": "Genetic engine not initialized"}, 400
+
+    _genetic_engine.evolve(request.fitness)
+
+    return _genetic_engine.get_population_state()
+
+
+@app.post("/api/genetic/config")
+async def genetic_config(request: GeneticConfigRequest):
+    """Update genetic algorithm configuration."""
+    global _genetic_engine
+
+    if _genetic_engine is None:
+        return {"error": "Genetic engine not initialized"}, 400
+
+    config_update = {k: v for k, v in request.model_dump().items() if v is not None}
+    _genetic_engine.update_config(config_update)
+
+    return {"config": _genetic_engine.config}
+
+
+@app.post("/api/genetic/export")
+async def genetic_export(request: GeneticExportRequest):
+    """Export an individual's data (W vector and image)."""
+    global _genetic_engine
+
+    if _genetic_engine is None:
+        return {"error": "Genetic engine not initialized"}, 400
+
+    data = _genetic_engine.export_individual(request.individual_id)
+
+    if data is None:
+        return {"error": "Individual not found"}, 404
+
+    return data
+
+
+@app.get("/api/genetic/image/{image_id}.png")
+async def genetic_image(image_id: str):
+    """Serve genetic algorithm images."""
+    filepath = os.path.join('exports', 'genetic', f'{image_id}.png')
+    if os.path.exists(filepath):
+        return FileResponse(filepath, media_type="image/png")
+    return {"error": "Image not found"}, 404
 
 
 if __name__ == "__main__":

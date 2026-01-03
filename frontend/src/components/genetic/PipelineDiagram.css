@@ -1,0 +1,141 @@
+.pipeline-diagram {
+  background: #1a1a2e;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 16px 0;
+}
+
+.pipeline-svg {
+  width: 100%;
+  max-width: 700px;
+  display: block;
+  margin: 0 auto;
+}
+
+.node {
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.node:hover {
+  opacity: 0.9;
+}
+
+.node-rect {
+  transition: fill 0.2s ease, stroke 0.2s ease;
+}
+
+.node-rect.active {
+  fill: #2a4a6e;
+  stroke: #4a9eff;
+  stroke-width: 2;
+}
+
+.node-rect.inactive {
+  fill: #2a2a3e;
+  stroke: #444;
+  stroke-width: 2;
+}
+
+.node-title {
+  fill: #fff;
+  font-size: 14px;
+  font-weight: bold;
+  text-anchor: middle;
+}
+
+.node-value {
+  fill: #aaa;
+  font-size: 12px;
+  text-anchor: middle;
+}
+
+.node.disabled .node-title,
+.node.disabled .node-value {
+  fill: #666;
+}
+
+.legend-text {
+  fill: #666;
+  font-size: 11px;
+}
+
+.config-panels {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #333;
+}
+
+.config-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.config-panel.disabled {
+  opacity: 0.5;
+}
+
+.config-panel label {
+  font-size: 12px;
+  color: #aaa;
+}
+
+.config-panel select,
+.config-panel input[type="range"] {
+  width: 100%;
+}
+
+.config-panel select {
+  padding: 6px 8px;
+  background: #2a2a3e;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.config-panel select:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.config-panel input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  background: #333;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.config-panel input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: #4a9eff;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.config-panel input[type="range"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .config-panels {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .config-panels {
+    grid-template-columns: 1fr;
+  }
+}

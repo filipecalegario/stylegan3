@@ -1,0 +1,149 @@
+.individual-card {
+  background: #1a1a2e;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.individual-card.hovered {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  border-color: #4a9eff;
+}
+
+.individual-card.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.individual-image-container {
+  position: relative;
+  aspect-ratio: 1;
+  background: #0f0f1a;
+}
+
+.individual-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 14px;
+}
+
+.individual-controls {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fitness-slider-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.fitness-slider {
+  flex: 1;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: linear-gradient(to right, #ff4444, #ffaa00, #44ff44);
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+
+.fitness-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: #fff;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  transition: transform 0.1s ease;
+}
+
+.fitness-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.fitness-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  background: #fff;
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.fitness-value {
+  min-width: 36px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 14px;
+  color: #fff;
+  background: #2a2a3e;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.individual-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.favorite-button {
+  background: #2a2a3e;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 18px;
+  color: #ffcc00;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.favorite-button:hover:not(:disabled) {
+  background: #3a3a4e;
+  transform: scale(1.1);
+}
+
+.favorite-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.individual-info {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #0f0f1a;
+  font-size: 11px;
+  color: #666;
+}
+
+.individual-id {
+  font-family: monospace;
+}
+
+.individual-gen {
+  color: #4a9eff;
+}

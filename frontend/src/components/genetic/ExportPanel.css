@@ -1,0 +1,118 @@
+.export-panel {
+  background: #1a1a2e;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 16px 0;
+}
+
+.export-panel h3 {
+  margin: 0 0 16px 0;
+  color: #fff;
+  font-size: 16px;
+}
+
+.export-panel.empty {
+  text-align: center;
+  padding: 24px;
+}
+
+.empty-message {
+  color: #666;
+  font-size: 14px;
+  margin: 0;
+}
+
+.favorites-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.favorite-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  background: #2a2a3e;
+  border-radius: 8px;
+}
+
+.favorite-thumb {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.favorite-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.favorite-id {
+  font-family: monospace;
+  color: #fff;
+  font-size: 12px;
+}
+
+.favorite-gen {
+  color: #666;
+  font-size: 11px;
+}
+
+.favorite-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.download-btn,
+.remove-btn {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.download-btn {
+  background: #3a3a4e;
+  color: #fff;
+}
+
+.download-btn:hover {
+  background: #4a9eff;
+}
+
+.remove-btn {
+  background: #3a3a4e;
+  color: #ff6666;
+}
+
+.remove-btn:hover {
+  background: #ff4444;
+  color: #fff;
+}
+
+/* Scrollbar styling */
+.favorites-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.favorites-list::-webkit-scrollbar-track {
+  background: #1a1a2e;
+  border-radius: 3px;
+}
+
+.favorites-list::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
+
+.favorites-list::-webkit-scrollbar-thumb:hover {
+  background: #444;
+}
