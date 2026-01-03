@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom'
 import { LatentExplorer } from './pages/LatentExplorer'
 import { GeneticEvolution } from './pages/GeneticEvolution'
+import { LatentInterpolation } from './pages/LatentInterpolation'
 import './App.css'
 
 function Navigation() {
@@ -20,6 +21,12 @@ function Navigation() {
       >
         Genetic Evolution
       </Link>
+      <Link
+        to="/interpolation"
+        className={`nav-link ${location.pathname === '/interpolation' ? 'active' : ''}`}
+      >
+        Interpolation
+      </Link>
     </nav>
   )
 }
@@ -32,6 +39,7 @@ function App() {
         <Routes>
           <Route path="/" element={<LatentExplorer />} />
           <Route path="/genetic" element={<GeneticEvolution />} />
+          <Route path="/interpolation" element={<LatentInterpolation />} />
         </Routes>
       </div>
     </Router>

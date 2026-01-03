@@ -1,0 +1,186 @@
+.dna-uploader {
+  background: #1a1a2e;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.uploader-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.uploader-header h3 {
+  margin: 0;
+  color: #fff;
+  font-size: 16px;
+}
+
+.file-count {
+  color: #666;
+  font-size: 14px;
+}
+
+.drop-zone {
+  border: 2px dashed #333;
+  border-radius: 8px;
+  padding: 32px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.drop-zone:hover {
+  border-color: #4a9eff;
+  background: rgba(74, 158, 255, 0.05);
+}
+
+.drop-zone.drag-over {
+  border-color: #4a9eff;
+  background: rgba(74, 158, 255, 0.1);
+}
+
+.drop-icon {
+  font-size: 32px;
+  color: #4a9eff;
+  margin-bottom: 8px;
+}
+
+.drop-zone p {
+  color: #aaa;
+  margin: 0 0 4px;
+}
+
+.drop-zone .hint {
+  color: #666;
+  font-size: 12px;
+}
+
+.dna-list {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dna-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #2a2a3e;
+  border-radius: 8px;
+  cursor: grab;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.dna-item:hover {
+  background: #3a3a4e;
+}
+
+.dna-item.dragging {
+  opacity: 0.5;
+  transform: scale(0.98);
+}
+
+.dna-item:active {
+  cursor: grabbing;
+}
+
+.dna-index {
+  width: 24px;
+  height: 24px;
+  background: #4a9eff;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.dna-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.dna-filename {
+  display: block;
+  color: #fff;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dna-meta {
+  display: block;
+  color: #666;
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.remove-btn {
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #666;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.remove-btn:hover:not(:disabled) {
+  background: #ff4444;
+  border-color: #ff4444;
+  color: #fff;
+}
+
+.remove-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.uploader-actions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.clear-btn {
+  padding: 8px 16px;
+  background: #2a2a3e;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #aaa;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.clear-btn:hover:not(:disabled) {
+  background: #3a3a4e;
+  color: #fff;
+}
+
+.clear-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.warning {
+  margin-top: 16px;
+  padding: 12px;
+  background: rgba(255, 170, 0, 0.1);
+  border: 1px solid rgba(255, 170, 0, 0.3);
+  border-radius: 8px;
+  color: #ffaa00;
+  font-size: 14px;
+  text-align: center;
+}

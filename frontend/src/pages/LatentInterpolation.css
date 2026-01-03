@@ -1,0 +1,160 @@
+.latent-interpolation {
+  min-height: 100vh;
+  background: #0f0f1a;
+  color: #fff;
+  padding: 20px;
+}
+
+.interpolation-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.interpolation-header h1 {
+  margin: 0;
+  font-size: 28px;
+  background: linear-gradient(135deg, #a855f7, #4a9eff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.interpolation-header p {
+  margin: 8px 0 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.error-banner {
+  background: #ff4444;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.interpolation-layout {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.interpolation-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.model-selector {
+  background: #1a1a2e;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.model-selector label {
+  display: block;
+  color: #aaa;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.model-selector select {
+  width: 100%;
+  padding: 12px;
+  background: #2a2a3e;
+  border: 1px solid #333;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 14px;
+}
+
+.model-selector select:focus {
+  outline: none;
+  border-color: #4a9eff;
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.preview-btn,
+.generate-btn,
+.cancel-btn {
+  padding: 14px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.preview-btn {
+  background: #2a2a3e;
+  color: #fff;
+  border: 1px solid #444;
+}
+
+.preview-btn:hover:not(:disabled) {
+  background: #3a3a4e;
+}
+
+.preview-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.generate-btn {
+  background: linear-gradient(135deg, #a855f7, #4a9eff);
+  color: #fff;
+}
+
+.generate-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(168, 85, 247, 0.3);
+}
+
+.generate-btn:disabled {
+  background: #333;
+  color: #666;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.cancel-btn {
+  background: transparent;
+  color: #ff6666;
+  border: 1px solid #ff6666;
+}
+
+.cancel-btn:hover {
+  background: rgba(255, 102, 102, 0.1);
+}
+
+.interpolation-main {
+  min-height: 500px;
+}
+
+@media (max-width: 900px) {
+  .interpolation-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .interpolation-sidebar {
+    order: 2;
+  }
+
+  .interpolation-main {
+    order: 1;
+    min-height: 300px;
+  }
+}

@@ -20,8 +20,13 @@ import uvicorn
 import dnnlib
 import legacy
 from genetic_engine import GeneticEngine
+from interpolation_engine import InterpolationEngine
 from pydantic import BaseModel
 from typing import Dict, List, Optional
+
+
+# Global interpolation engine instance
+_interpolation_engine: Optional[InterpolationEngine] = None
 
 
 # Pydantic models for genetic algorithm endpoints
@@ -49,6 +54,26 @@ class GeneticConfigRequest(BaseModel):
 
 class GeneticExportRequest(BaseModel):
     individual_id: str
+
+
+# Pydantic models for interpolation endpoints
+class InterpolationRequest(BaseModel):
+    model: str
+    w_vectors: List[List[float]]  # List of W vectors (each 512 floats)
+    fps: int = 30
+    frames_per_transition: int = 60
+    interpolation_kind: str = 'cubic'  # 'linear', 'cubic', 'quadratic'
+    loop: bool = True
+    image_size: int = 512
+
+
+class InterpolationPreviewRequest(BaseModel):
+    model: str
+    w_vectors: List[List[float]]
+    num_frames: int = 10
+    interpolation_kind: str = 'cubic'
+    loop: bool = True
+    image_size: int = 256
 
 
 app = FastAPI(title="StyleGAN3 Latent Space Explorer API")
@@ -403,6 +428,119 @@ async def genetic_image(image_id: str):
     if os.path.exists(filepath):
         return FileResponse(filepath, media_type="image/png")
     return {"error": "Image not found"}, 404
+
+
+# ============ Interpolation Endpoints ============
+
+@app.post("/api/interpolation/preview")
+async def interpolation_preview(request: InterpolationPreviewRequest):
+    """Generate preview frames for interpolation."""
+    global _interpolation_engine
+
+    model_path = os.path.join('models', request.model)
+    _interpolation_engine = InterpolationEngine(model_path)
+
+    w_vectors = [np.array(w, dtype=np.float32) for w in request.w_vectors]
+
+    try:
+        frame_urls = _interpolation_engine.generate_preview_frames(
+            w_vectors=w_vectors,
+            num_preview_frames=request.num_frames,
+            interpolation_kind=request.interpolation_kind,
+            loop=request.loop,
+            image_size=request.image_size
+        )
+        return {"frames": frame_urls}
+    except Exception as e:
+        return {"error": str(e)}, 400
+
+
+@app.get("/api/interpolation/preview/{preview_id}/{filename}")
+async def get_preview_frame(preview_id: str, filename: str):
+    """Serve preview frames."""
+    filepath = os.path.join('exports', 'videos', f'preview_{preview_id}', filename)
+    if os.path.exists(filepath):
+        return FileResponse(filepath, media_type="image/png")
+    return {"error": "Frame not found"}, 404
+
+
+@app.get("/api/interpolation/video/{filename}")
+async def get_interpolation_video(filename: str):
+    """Serve generated videos."""
+    filepath = os.path.join('exports', 'videos', filename)
+    if os.path.exists(filepath):
+        if filename.endswith('.gif'):
+            return FileResponse(filepath, media_type="image/gif")
+        return FileResponse(filepath, media_type="video/mp4")
+    return {"error": "Video not found"}, 404
+
+
+@app.websocket("/ws/interpolation")
+async def websocket_interpolation(websocket: WebSocket):
+    """WebSocket endpoint for video generation with progress updates."""
+    await websocket.accept()
+
+    try:
+        while True:
+            data = await websocket.receive_text()
+            message = json.loads(data)
+
+            if message.get("action") == "generate":
+                params = message.get("params", {})
+
+                try:
+                    model_path = os.path.join('models', params.get('model'))
+                    engine = InterpolationEngine(model_path)
+
+                    w_vectors = [np.array(w, dtype=np.float32) for w in params.get('w_vectors', [])]
+
+                    async def progress_callback(progress: float, msg: str):
+                        await websocket.send_json({
+                            "type": "progress",
+                            "value": progress,
+                            "message": msg
+                        })
+
+                    # Run in executor to not block
+                    import functools
+                    loop = asyncio.get_event_loop()
+
+                    def sync_generate():
+                        def sync_callback(progress, msg):
+                            asyncio.run_coroutine_threadsafe(
+                                websocket.send_json({
+                                    "type": "progress",
+                                    "value": progress,
+                                    "message": msg
+                                }),
+                                loop
+                            )
+
+                        return engine.generate_video(
+                            w_vectors=w_vectors,
+                            fps=params.get('fps', 30),
+                            frames_per_transition=params.get('frames_per_transition', 60),
+                            interpolation_kind=params.get('interpolation_kind', 'cubic'),
+                            loop=params.get('loop', True),
+                            image_size=params.get('image_size', 512),
+                            progress_callback=sync_callback
+                        )
+
+                    result = await loop.run_in_executor(None, sync_generate)
+
+                    await websocket.send_json({
+                        "type": "complete",
+                        **result
+                    })
+
+                except Exception as e:
+                    await websocket.send_json({
+                        "type": "error",
+                        "message": str(e)
+                    })
+
+    except WebSocketDisconnect:
+        print("Interpolation WebSocket disconnected")
 
 
 if __name__ == "__main__":
