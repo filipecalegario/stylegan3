@@ -20,7 +20,18 @@ export function WVectorEditor() {
     randomizeVectorSoft,
     generateImage,
     saveDNA,
-    loadDNA
+    loadDNA,
+    // Sequencer
+    sequencerRunning,
+    sequencerPaused,
+    sequencerDimension,
+    sequencerValue,
+    sequencerConfig,
+    startSequencer,
+    pauseSequencer,
+    resumeSequencer,
+    stopSequencer,
+    updateSequencerConfig
   } = useWVectorEditor()
 
   // Fetch available models
@@ -88,6 +99,68 @@ export function WVectorEditor() {
             />
           </label>
         </div>
+      </div>
+
+      {/* Sequencer controls */}
+      <div className="sequencer-bar">
+        <div className="sequencer-controls">
+          {!sequencerRunning ? (
+            <button onClick={startSequencer} disabled={isGenerating} className="seq-btn start">
+              ▶ Start Sequencer
+            </button>
+          ) : (
+            <>
+              {sequencerPaused ? (
+                <button onClick={resumeSequencer} className="seq-btn resume">
+                  ▶ Resume
+                </button>
+              ) : (
+                <button onClick={pauseSequencer} className="seq-btn pause">
+                  ⏸ Pause
+                </button>
+              )}
+              <button onClick={stopSequencer} className="seq-btn stop">
+                ⏹ Stop & Keep
+              </button>
+            </>
+          )}
+        </div>
+
+        <div className="sequencer-config">
+          <label>
+            Increment:
+            <input
+              type="number"
+              value={sequencerConfig.increment}
+              onChange={(e) => updateSequencerConfig({ increment: parseFloat(e.target.value) || 0.1 })}
+              step="0.05"
+              min="0.01"
+              max="1"
+              disabled={sequencerRunning}
+            />
+          </label>
+          <label>
+            Delay (ms):
+            <input
+              type="number"
+              value={sequencerConfig.delay}
+              onChange={(e) => updateSequencerConfig({ delay: parseInt(e.target.value) || 20 })}
+              step="10"
+              min="10"
+              max="1000"
+              disabled={sequencerRunning}
+            />
+          </label>
+        </div>
+
+        {sequencerRunning && (
+          <div className="sequencer-status">
+            <span className="dim-label">Dimension:</span>
+            <span className="dim-value">{sequencerDimension}/511</span>
+            <span className="val-label">Value:</span>
+            <span className="val-value">{sequencerValue.toFixed(2)}</span>
+          </div>
+        )}
       </div>
 
       {/* Canvas full width */}

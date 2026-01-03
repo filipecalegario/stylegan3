@@ -98,6 +98,122 @@
   cursor: not-allowed;
 }
 
+/* Sequencer bar */
+.sequencer-bar {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  margin-bottom: 20px;
+  padding: 12px 20px;
+  background: #1a1a2e;
+  border-radius: 12px;
+  border: 1px solid #2a2a3e;
+}
+
+.sequencer-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.seq-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.seq-btn.start {
+  background: linear-gradient(135deg, #00aa55, #00ff88);
+  color: #000;
+}
+
+.seq-btn.start:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 255, 136, 0.3);
+}
+
+.seq-btn.start:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.seq-btn.pause {
+  background: #ff9500;
+  color: #000;
+}
+
+.seq-btn.resume {
+  background: #00aa55;
+  color: #000;
+}
+
+.seq-btn.stop {
+  background: #ff4444;
+  color: #fff;
+}
+
+.seq-btn.pause:hover,
+.seq-btn.resume:hover,
+.seq-btn.stop:hover {
+  transform: translateY(-1px);
+}
+
+.sequencer-config {
+  display: flex;
+  gap: 20px;
+}
+
+.sequencer-config label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #888;
+  font-size: 13px;
+}
+
+.sequencer-config input {
+  width: 70px;
+  padding: 6px 10px;
+  background: #2a2a3e;
+  border: 1px solid #333;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 13px;
+}
+
+.sequencer-config input:disabled {
+  opacity: 0.5;
+}
+
+.sequencer-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background: #252540;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.dim-label, .val-label {
+  color: #666;
+}
+
+.dim-value {
+  color: #4a9eff;
+  font-weight: 600;
+  font-family: monospace;
+}
+
+.val-value {
+  color: #00ff88;
+  font-weight: 600;
+  font-family: monospace;
+}
+
 /* Canvas section */
 .canvas-section {
   margin-bottom: 20px;
