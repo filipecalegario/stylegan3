@@ -4,11 +4,13 @@ import './WVectorCanvas.css'
 export function WVectorCanvas({ wVector, onUpdateValues, onMouseUp }) {
   const canvasRef = useRef(null)
   const isPaintingRef = useRef(false)
+  const lastPosRef = useRef(null)  // Track last position for interpolation
 
   const WIDTH = 2048  // Canvas width (full width for wider bars)
-  const HEIGHT = 350  // Canvas height
+  const HEIGHT = 200  // Canvas height (compact)
   const BAR_WIDTH = WIDTH / 512  // ~4px per bar
   const MID_Y = HEIGHT / 2
+  const VALUE_RANGE = 3  // -3 to +3
 
   // Draw the bars
   useEffect(() => {
@@ -46,8 +48,9 @@ export function WVectorCanvas({ wVector, onUpdateValues, onMouseUp }) {
       const value = wVector[i]
       const x = i * BAR_WIDTH
 
-      // Bar height proportional to value
-      const barHeight = (Math.abs(value) / 10) * (HEIGHT / 2 - 10)
+      // Bar height proportional to value (clamped to range)
+      const clampedValue = Math.max(-VALUE_RANGE, Math.min(VALUE_RANGE, value))
+      const barHeight = (Math.abs(clampedValue) / VALUE_RANGE) * (HEIGHT / 2 - 5)
 
       if (value > 0) {
         // Green bar going up
@@ -82,28 +85,62 @@ export function WVectorCanvas({ wVector, onUpdateValues, onMouseUp }) {
     const index = Math.floor(x / BAR_WIDTH)
     const clampedIndex = Math.max(0, Math.min(511, index))
 
-    // Y to value: middle = 0, top = +10, bottom = -10
-    const value = ((MID_Y - y) / (HEIGHT / 2)) * 10
-    const clampedValue = Math.max(-10, Math.min(10, value))
+    // Y to value: middle = 0, top = +3, bottom = -3
+    const value = ((MID_Y - y) / (HEIGHT / 2)) * VALUE_RANGE
+    const clampedValue = Math.max(-VALUE_RANGE, Math.min(VALUE_RANGE, value))
 
     return { index: clampedIndex, value: clampedValue }
   }, [])
 
+  // Interpolate between two positions, filling all bars in between
+  const interpolatePositions = useCallback((fromPos, toPos) => {
+    const updates = []
+    const startIdx = Math.min(fromPos.index, toPos.index)
+    const endIdx = Math.max(fromPos.index, toPos.index)
+
+    if (startIdx === endIdx) {
+      // Same bar, just update it
+      updates.push({ index: toPos.index, value: toPos.value })
+    } else {
+      // Interpolate all bars between start and end
+      for (let i = startIdx; i <= endIdx; i++) {
+        // Linear interpolation of value based on position
+        const t = (i - fromPos.index) / (toPos.index - fromPos.index)
+        const interpolatedValue = fromPos.value + t * (toPos.value - fromPos.value)
+        updates.push({ index: i, value: interpolatedValue })
+      }
+    }
+
+    return updates
+  }, [])
+
   const handleMouseDown = useCallback((e) => {
     isPaintingRef.current = true
-    const { index, value } = getValueFromMouse(e)
-    onUpdateValues([{ index, value }])
+    const pos = getValueFromMouse(e)
+    lastPosRef.current = pos
+    onUpdateValues([{ index: pos.index, value: pos.value }])
   }, [getValueFromMouse, onUpdateValues])
 
   const handleMouseMove = useCallback((e) => {
     if (!isPaintingRef.current) return
-    const { index, value } = getValueFromMouse(e)
-    onUpdateValues([{ index, value }])
-  }, [getValueFromMouse, onUpdateValues])
+
+    const currentPos = getValueFromMouse(e)
+
+    if (lastPosRef.current) {
+      // Interpolate between last position and current position
+      const updates = interpolatePositions(lastPosRef.current, currentPos)
+      onUpdateValues(updates)
+    } else {
+      onUpdateValues([{ index: currentPos.index, value: currentPos.value }])
+    }
+
+    lastPosRef.current = currentPos
+  }, [getValueFromMouse, onUpdateValues, interpolatePositions])
 
   const handleMouseUp = useCallback(() => {
     if (isPaintingRef.current) {
       isPaintingRef.current = false
+      lastPosRef.current = null
       onMouseUp()  // Trigger image generation
     }
   }, [onMouseUp])
@@ -111,6 +148,7 @@ export function WVectorCanvas({ wVector, onUpdateValues, onMouseUp }) {
   const handleMouseLeave = useCallback(() => {
     if (isPaintingRef.current) {
       isPaintingRef.current = false
+      lastPosRef.current = null
       onMouseUp()
     }
   }, [onMouseUp])
@@ -118,9 +156,9 @@ export function WVectorCanvas({ wVector, onUpdateValues, onMouseUp }) {
   return (
     <div className="wvector-canvas-container">
       <div className="axis-labels">
-        <span className="label-top">+10</span>
+        <span className="label-top">+3</span>
         <span className="label-mid">0</span>
-        <span className="label-bottom">-10</span>
+        <span className="label-bottom">-3</span>
       </div>
       <canvas
         ref={canvasRef}

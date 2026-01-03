@@ -17,6 +17,7 @@ export function WVectorEditor() {
     updateValues,
     resetVector,
     randomizeVector,
+    randomizeVectorSoft,
     generateImage,
     saveDNA,
     loadDNA
@@ -68,8 +69,11 @@ export function WVectorEditor() {
           <button onClick={resetVector} disabled={isGenerating}>
             Reset
           </button>
+          <button onClick={randomizeVectorSoft} disabled={isGenerating}>
+            Soft Random
+          </button>
           <button onClick={randomizeVector} disabled={isGenerating}>
-            Random
+            Full Random
           </button>
           <button onClick={saveDNA} disabled={isGenerating}>
             Save DNA

@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react'
 
 const API_BASE = 'http://127.0.0.1:8000'
+const VALUE_RANGE = 3  // -3 to +3
 
 export function useWVectorEditor() {
   // W vector state (512 floats, initially zeros)
@@ -14,7 +15,7 @@ export function useWVectorEditor() {
   const updateValue = useCallback((index, value) => {
     setWVector(prev => {
       const newW = new Float32Array(prev)
-      newW[index] = Math.max(-10, Math.min(10, value))
+      newW[index] = Math.max(-VALUE_RANGE, Math.min(VALUE_RANGE, value))
       return newW
     })
   }, [])
@@ -25,17 +26,43 @@ export function useWVectorEditor() {
     setWVector(prev => {
       const newW = new Float32Array(prev)
       for (const { index, value } of updates) {
-        newW[index] = Math.max(-10, Math.min(10, value))
+        newW[index] = Math.max(-VALUE_RANGE, Math.min(VALUE_RANGE, value))
       }
       return newW
     })
   }, [])
 
-  // Reset to zeros
-  const resetVector = useCallback(() => {
-    setWVector(new Float32Array(512).fill(0))
-    setImageUrl(null)
-  }, [])
+  // Reset to zeros and generate image
+  const resetVector = useCallback(async () => {
+    const newW = new Float32Array(512).fill(0)
+    setWVector(newW)
+
+    // Generate image with zero vector
+    if (selectedModel) {
+      setIsGenerating(true)
+      setError(null)
+      try {
+        const response = await fetch(`${API_BASE}/api/wvector/generate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: selectedModel,
+            w_vector: Array.from(newW),
+            image_size: 512
+          })
+        })
+        if (!response.ok) {
+          throw new Error(`HTTP error ${response.status}`)
+        }
+        const data = await response.json()
+        setImageUrl(`${API_BASE}${data.image_url}`)
+      } catch (err) {
+        setError(err.message)
+      } finally {
+        setIsGenerating(false)
+      }
+    }
+  }, [selectedModel])
 
   // Generate image from current W vector
   const generateImage = useCallback(async () => {
@@ -129,15 +156,50 @@ export function useWVectorEditor() {
     reader.readAsText(file)
   }, [selectedModel])
 
-  // Randomize vector
-  const randomizeVector = useCallback(() => {
+  // Helper to randomize and generate image
+  const randomizeAndGenerate = useCallback(async (range) => {
     const newW = new Float32Array(512)
     for (let i = 0; i < 512; i++) {
-      // Random values with normal distribution, scaled to fit range
-      newW[i] = (Math.random() * 2 - 1) * 3  // Range approx -3 to +3
+      newW[i] = (Math.random() * 2 - 1) * range
     }
     setWVector(newW)
-  }, [])
+
+    // Generate image with the new random vector
+    if (selectedModel) {
+      setIsGenerating(true)
+      setError(null)
+      try {
+        const response = await fetch(`${API_BASE}/api/wvector/generate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: selectedModel,
+            w_vector: Array.from(newW),
+            image_size: 512
+          })
+        })
+        if (!response.ok) {
+          throw new Error(`HTTP error ${response.status}`)
+        }
+        const data = await response.json()
+        setImageUrl(`${API_BASE}${data.image_url}`)
+      } catch (err) {
+        setError(err.message)
+      } finally {
+        setIsGenerating(false)
+      }
+    }
+  }, [selectedModel])
+
+  // Randomize vector full range (-3 to +3)
+  const randomizeVector = useCallback(() => {
+    randomizeAndGenerate(VALUE_RANGE)
+  }, [randomizeAndGenerate])
+
+  // Randomize vector soft range (-1 to +1)
+  const randomizeVectorSoft = useCallback(() => {
+    randomizeAndGenerate(1)
+  }, [randomizeAndGenerate])
 
   return {
     wVector,
@@ -150,6 +212,7 @@ export function useWVectorEditor() {
     updateValues,
     resetVector,
     randomizeVector,
+    randomizeVectorSoft,
     generateImage,
     saveDNA,
     loadDNA
