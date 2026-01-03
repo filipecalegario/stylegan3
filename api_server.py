@@ -21,8 +21,10 @@ import dnnlib
 import legacy
 from genetic_engine import GeneticEngine
 from interpolation_engine import InterpolationEngine
+from stylegan_utils import generate_image_from_w
 from pydantic import BaseModel
 from typing import Dict, List, Optional
+import uuid
 
 
 # Global interpolation engine instance
@@ -74,6 +76,13 @@ class InterpolationPreviewRequest(BaseModel):
     interpolation_kind: str = 'cubic'
     loop: bool = True
     image_size: int = 256
+
+
+# Pydantic models for W Vector Editor endpoints
+class WVectorRequest(BaseModel):
+    model: str
+    w_vector: List[float]  # 512 floats
+    image_size: int = 512
 
 
 app = FastAPI(title="StyleGAN3 Latent Space Explorer API")
@@ -541,6 +550,44 @@ async def websocket_interpolation(websocket: WebSocket):
 
     except WebSocketDisconnect:
         print("Interpolation WebSocket disconnected")
+
+
+# ============ W Vector Editor Endpoints ============
+
+@app.post("/api/wvector/generate")
+async def generate_from_w_vector(request: WVectorRequest):
+    """Generate image from a raw W vector (512 floats)."""
+
+    # Validate W vector length
+    if len(request.w_vector) != 512:
+        return {"error": f"W vector must have 512 values, got {len(request.w_vector)}"}, 400
+
+    # Convert to numpy array
+    w_array = np.array(request.w_vector, dtype=np.float32)
+
+    # Generate image using utility function
+    model_path = os.path.join('models', request.model)
+    img = generate_image_from_w(w_array, model_path, size=request.image_size)
+
+    # Save image
+    image_id = str(uuid.uuid4())[:8]
+    os.makedirs('exports/wvector', exist_ok=True)
+    image_path = os.path.join('exports', 'wvector', f'{image_id}.png')
+    img.save(image_path)
+
+    return {
+        "image_url": f"/api/wvector/image/{image_id}.png",
+        "image_id": image_id
+    }
+
+
+@app.get("/api/wvector/image/{filename}")
+async def get_wvector_image(filename: str):
+    """Serve W vector editor generated images."""
+    filepath = os.path.join('exports', 'wvector', filename)
+    if os.path.exists(filepath):
+        return FileResponse(filepath, media_type="image/png")
+    return {"error": "Image not found"}, 404
 
 
 if __name__ == "__main__":

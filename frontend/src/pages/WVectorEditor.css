@@ -1,0 +1,176 @@
+.wvector-editor {
+  min-height: 100vh;
+  background: #0f0f1a;
+  color: #fff;
+  padding: 20px;
+}
+
+.editor-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.editor-header h1 {
+  margin: 0;
+  font-size: 28px;
+  background: linear-gradient(135deg, #00ff88, #4a9eff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.editor-header p {
+  margin: 8px 0 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.error-banner {
+  background: #ff4444;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Toolbar horizontal */
+.toolbar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  margin-bottom: 20px;
+  padding: 16px 20px;
+  background: #1a1a2e;
+  border-radius: 12px;
+}
+
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toolbar-group label {
+  color: #888;
+  font-size: 14px;
+}
+
+.toolbar-group select {
+  padding: 10px 16px;
+  background: #2a2a3e;
+  border: 1px solid #333;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 14px;
+  min-width: 200px;
+}
+
+.toolbar-group select:focus {
+  outline: none;
+  border-color: #4a9eff;
+}
+
+.toolbar-group button,
+.toolbar-group .file-upload-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #2a2a3e;
+  color: #fff;
+  border: 1px solid #333;
+  text-align: center;
+}
+
+.toolbar-group button:hover:not(:disabled),
+.toolbar-group .file-upload-btn:hover {
+  background: #3a3a4e;
+  border-color: #4a9eff;
+}
+
+.toolbar-group button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Canvas section */
+.canvas-section {
+  margin-bottom: 20px;
+}
+
+.hint {
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+  margin: 12px 0 0;
+}
+
+.hint .green {
+  color: #00ff88;
+}
+
+.hint .red {
+  color: #ff4444;
+}
+
+/* Preview section */
+.preview-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  background: #1a1a2e;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.preview-image {
+  max-width: 512px;
+  max-height: 512px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.placeholder {
+  text-align: center;
+  color: #555;
+  font-size: 16px;
+}
+
+.generating {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: #888;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #333;
+  border-top-color: #4a9eff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 900px) {
+  .toolbar {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .toolbar-group {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}

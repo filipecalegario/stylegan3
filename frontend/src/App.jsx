@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react
 import { LatentExplorer } from './pages/LatentExplorer'
 import { GeneticEvolution } from './pages/GeneticEvolution'
 import { LatentInterpolation } from './pages/LatentInterpolation'
+import { WVectorEditor } from './pages/WVectorEditor'
 import './App.css'
 
 function Navigation() {
@@ -27,6 +28,12 @@ function Navigation() {
       >
         Interpolation
       </Link>
+      <Link
+        to="/w-editor"
+        className={`nav-link ${location.pathname === '/w-editor' ? 'active' : ''}`}
+      >
+        W Editor
+      </Link>
     </nav>
   )
 }
@@ -40,6 +47,7 @@ function App() {
           <Route path="/" element={<LatentExplorer />} />
           <Route path="/genetic" element={<GeneticEvolution />} />
           <Route path="/interpolation" element={<LatentInterpolation />} />
+          <Route path="/w-editor" element={<WVectorEditor />} />
         </Routes>
       </div>
     </Router>
