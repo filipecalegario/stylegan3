@@ -1,0 +1,318 @@
+/* ============================================================
+   Latent Studio — design system
+   Tokens + base elements shared by every page.
+   ============================================================ */
+
+:root {
+  /* ---- Two-channel palette ----
+     Grounded in two-channel fluorescence microscopy: a GFP-green data
+     channel and a magenta phenotype channel over a cool green-black ground.
+     green = genotype / data / positive · magenta = phenotype / action / selected */
+  --void: #080b0a;
+  --bg: #080b0a;
+  --surface-1: #0e1312;
+  --surface-2: #141b19;
+  --surface-3: #1b2422;
+  --surface-hover: #24302d;
+
+  --border: rgba(110, 200, 168, 0.11);
+  --border-strong: rgba(110, 200, 168, 0.26);
+
+  --text-1: #e9f2ee;
+  --text-2: #9db5ac;
+  --text-3: #5e746c;
+
+  /* Channels — kept under the legacy token names so all components inherit */
+  --gfp: #39f0a8; /* green channel */
+  --mag: #ff54cf; /* magenta channel */
+  --accent: #39f0a8; /* primary = green channel (data, focus, genotype) */
+  --accent-2: #ff54cf; /* secondary = magenta channel (action, selection) */
+  --success: #39f0a8;
+  --danger: #ff5c6a;
+  --warning: #ffcf5c;
+  --gold: #ffcf5c;
+
+  /* Identity gradient: green→magenta literally = breeding two genetic channels */
+  --grad-accent: linear-gradient(135deg, #39f0a8, #ff54cf);
+
+  /* Per-page position along the genotype↔phenotype axis */
+  --hue-explorer: linear-gradient(120deg, #39f0a8, #6ff0d0); /* green-forward: the atlas */
+  --hue-genetic: linear-gradient(120deg, #39f0a8, #ff54cf); /* full axis: breeding */
+  --hue-interp: linear-gradient(120deg, #ff54cf, #39f0a8); /* reversed: the transition itself */
+  --hue-wvector: linear-gradient(120deg, #39f0a8, #37e0ff); /* green-forward: raw genes */
+
+  /* Geometry & depth */
+  --r-sm: 7px;
+  --r-md: 11px;
+  --r-lg: 16px;
+  --shadow-1: 0 2px 10px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 14px 38px rgba(0, 0, 0, 0.5);
+  --ring: 0 0 0 3px rgba(57, 240, 168, 0.32);
+
+  /* Type — Syne (display, art-world) · Hanken Grotesk (body) · Martian Mono (data) */
+  --font-display: 'Syne', system-ui, sans-serif;
+  --font-sans: 'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'Martian Mono', ui-monospace, 'Cascadia Code', Consolas, monospace;
+
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scrollbar-color: var(--surface-3) transparent;
+}
+
+body {
+  font-family: var(--font-sans);
+  background:
+    radial-gradient(1100px 520px at 12% -12%, rgba(57, 240, 168, 0.08), transparent 60%),
+    radial-gradient(900px 520px at 96% 8%, rgba(255, 84, 207, 0.06), transparent 55%),
+    var(--bg);
+  background-attachment: fixed;
+  color: var(--text-1);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: rgba(57, 240, 168, 0.28);
+  color: #061a12;
+}
+
+/* Display + data faces applied centrally so pages inherit the pairing */
+.genetic-header h1,
+.interpolation-header h1,
+.editor-header h1,
+.latent-explorer .header h1,
+.page-header h1 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(27px, 3.6vw, 38px);
+  letter-spacing: -0.015em;
+}
+
+/* ---------- Scrollbars ---------- */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--surface-3);
+  border-radius: 999px;
+  border: 2px solid var(--bg);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--surface-hover);
+}
+
+/* ---------- Focus ---------- */
+:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+/* ---------- Motion floor ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------- Form elements (shared base) ---------- */
+select,
+input[type='text'],
+input[type='number'] {
+  font-family: var(--font-sans);
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text-1);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+select:hover,
+input[type='text']:hover,
+input[type='number']:hover {
+  border-color: var(--border-strong);
+}
+
+select:focus,
+input[type='text']:focus,
+input[type='number']:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(57, 240, 168, 0.16);
+}
+
+select {
+  cursor: pointer;
+}
+
+input[type='checkbox'],
+input[type='radio'] {
+  accent-color: var(--accent);
+}
+
+/* ---------- Range sliders (shared base) ---------- */
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--surface-3);
+  outline: none;
+  cursor: pointer;
+}
+
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid var(--accent);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+  transition: transform 0.12s ease;
+}
+
+input[type='range']::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+input[type='range']::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid var(--accent);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+}
+
+input[type='range']:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ---------- Buttons (shared base) ---------- */
+button {
+  font-family: var(--font-sans);
+}
+
+/* Primary action button — reuse via className="btn-primary" or extend */
+.btn-primary {
+  padding: 13px 28px;
+  background: var(--grad-accent);
+  border: none;
+  border-radius: var(--r-sm);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.15s ease;
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(57, 240, 168, 0.28);
+  filter: brightness(1.06);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-primary:disabled {
+  background: var(--surface-3);
+  color: var(--text-3);
+  cursor: not-allowed;
+}
+
+.btn-ghost {
+  padding: 12px 24px;
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text-1);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: var(--surface-hover);
+  border-color: var(--border-strong);
+}
+
+.btn-ghost:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---------- Shared page scaffolding ---------- */
+.page-header {
+  text-align: center;
+  padding: 28px 20px 6px;
+  margin-bottom: 26px;
+}
+
+.page-header h1 {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.page-header p {
+  margin-top: 8px;
+  color: var(--text-3);
+  font-size: 14px;
+}
+
+.error-banner {
+  background: rgba(248, 113, 113, 0.12);
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  color: var(--danger);
+  padding: 12px 20px;
+  border-radius: var(--r-sm);
+  margin: 0 auto 20px;
+  text-align: center;
+  max-width: 1200px;
+  font-size: 14px;
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+/* Section eyebrows read as instrument-panel labels: mono, tracked, dim.
+   Martian Mono is wide, so keep tracking modest and size small. */
+.parameter-panel h2,
+.export-panel h3,
+.interpolation-config h3,
+.dna-uploader .uploader-header h3 {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--text-2);
+}

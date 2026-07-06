@@ -95,6 +95,7 @@ export function PipelineDiagram({ config, onConfigChange }) {
           >
             <option value="roulette">Roulette Wheel</option>
             <option value="tournament">Tournament</option>
+            <option value="mating_pool">Mating Pool (Latent Hiker)</option>
           </select>
         </div>
 
@@ -114,26 +115,39 @@ export function PipelineDiagram({ config, onConfigChange }) {
 
         {/* Mutation config */}
         <div className={`config-panel ${!config.mutation_enabled ? 'disabled' : ''}`}>
-          <label>Mutation Rate: {(config.mutation_rate * 100).toFixed(0)}%</label>
+          <label>Mutation Method</label>
+          <select
+            value={config.mutation_method || 'gaussian'}
+            onChange={(e) => handleMethodChange('mutation_method', e.target.value)}
+            disabled={!config.mutation_enabled}
+          >
+            <option value="gaussian">Gaussian (perturb)</option>
+            <option value="reset">Reset gene (Latent Hiker)</option>
+          </select>
+          <label>Mutation Rate: {(config.mutation_rate * 100).toFixed(1)}%</label>
           <input
             type="range"
             min="0"
             max="0.5"
-            step="0.01"
+            step="0.005"
             value={config.mutation_rate}
             onChange={(e) => handleValueChange('mutation_rate', e.target.value)}
             disabled={!config.mutation_enabled}
           />
-          <label>Mutation Strength: {config.mutation_strength.toFixed(2)}</label>
-          <input
-            type="range"
-            min="0.01"
-            max="1"
-            step="0.01"
-            value={config.mutation_strength}
-            onChange={(e) => handleValueChange('mutation_strength', e.target.value)}
-            disabled={!config.mutation_enabled}
-          />
+          {config.mutation_method !== 'reset' && (
+            <>
+              <label>Mutation Strength: {config.mutation_strength.toFixed(2)}</label>
+              <input
+                type="range"
+                min="0.01"
+                max="1"
+                step="0.01"
+                value={config.mutation_strength}
+                onChange={(e) => handleValueChange('mutation_strength', e.target.value)}
+                disabled={!config.mutation_enabled}
+              />
+            </>
+          )}
         </div>
 
         {/* Elitism config */}

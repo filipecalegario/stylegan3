@@ -6,13 +6,16 @@ export function useGeneticAlgorithm() {
   const [population, setPopulation] = useState([]);
   const [generation, setGeneration] = useState(0);
   const [config, setConfig] = useState({
+    latent_space: 'w',
     crossover_enabled: true,
     crossover_method: 'single_point',
     mutation_enabled: true,
+    mutation_method: 'gaussian',
     mutation_rate: 0.1,
     mutation_strength: 0.3,
     elitism_count: 1,
     selection_method: 'roulette',
+    truncation_psi: 0.7,
     image_size: 256
   });
   const [fitness, setFitness] = useState({});
@@ -34,7 +37,7 @@ export function useGeneticAlgorithm() {
     setFitness(newFitness);
   }, []);
 
-  const initializePopulation = useCallback(async (model, populationSize = 9, seed = null, imageSize = 256) => {
+  const initializePopulation = useCallback(async (model, populationSize = 9, seed = null, imageSize = 256, options = {}) => {
     setIsLoading(true);
     setError(null);
 
@@ -46,7 +49,8 @@ export function useGeneticAlgorithm() {
           model,
           population_size: populationSize,
           seed,
-          image_size: imageSize
+          image_size: imageSize,
+          ...options // latent_space, truncation_psi, preset
         })
       });
 
@@ -158,9 +162,11 @@ export function useGeneticAlgorithm() {
   }, []);
 
   const downloadFavorite = useCallback((favorite) => {
-    // Download JSON with W vector
+    // Download JSON with DNA (raw latent) + W vector (compat with other pages)
     const jsonData = JSON.stringify({
       id: favorite.id,
+      dna: favorite.dna,
+      latent_space: favorite.latent_space,
       w_vector: favorite.w_vector,
       fitness: favorite.fitness,
       generation: favorite.generation

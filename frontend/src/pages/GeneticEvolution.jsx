@@ -14,6 +14,7 @@ export function GeneticEvolution() {
   const [populationSize, setPopulationSize] = useState(9);
   const [imageSize, setImageSize] = useState(256);
   const [seed, setSeed] = useState('');
+  const [algorithm, setAlgorithm] = useState('custom'); // 'custom' | 'latent_hiker'
   const [showInitPanel, setShowInitPanel] = useState(true);
 
   const {
@@ -56,7 +57,8 @@ export function GeneticEvolution() {
         selectedModel,
         populationSize,
         seed ? parseInt(seed, 10) : null,
-        imageSize
+        imageSize,
+        algorithm === 'latent_hiker' ? { preset: 'latent_hiker' } : {}
       );
       setShowInitPanel(false);
     } catch (err) {
@@ -79,8 +81,8 @@ export function GeneticEvolution() {
   return (
     <div className="genetic-evolution">
       <header className="genetic-header">
-        <h1>Interactive Genetic Evolution</h1>
-        <p>Evolve StyleGAN3 images using genetic algorithms</p>
+        <h1>Genetic Evolution</h1>
+        <p>Breed images by taste — you rate, the population evolves.</p>
       </header>
 
       {error && (
@@ -104,6 +106,23 @@ export function GeneticEvolution() {
                   <option key={model} value={model}>{model}</option>
                 ))}
               </select>
+            </div>
+
+            <div className="form-group">
+              <label>Algorithm</label>
+              <select
+                value={algorithm}
+                onChange={(e) => setAlgorithm(e.target.value)}
+              >
+                <option value="custom">Custom (W-space)</option>
+                <option value="latent_hiker">Latent Hiker (Carvalho 2020, Z-space)</option>
+              </select>
+              {algorithm === 'latent_hiker' && (
+                <small className="form-hint">
+                  DNA = raw Z vector · mating-pool selection · uniform crossover ·
+                  gene-reset mutation (1%) · no elitism · ψ = 1.0
+                </small>
+              )}
             </div>
 
             <div className="form-group">

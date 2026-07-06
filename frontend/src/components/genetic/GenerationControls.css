@@ -2,15 +2,16 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
-  background: #1a1a2e;
-  border-radius: 12px;
+  padding: 16px 22px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
   margin: 16px 0;
 }
 
 .generation-info {
   display: flex;
-  gap: 32px;
+  gap: 36px;
 }
 
 .generation-counter,
@@ -21,16 +22,19 @@
 }
 
 .generation-info .label {
-  font-size: 12px;
-  color: #666;
+  font-size: 11px;
+  color: var(--text-3);
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.12em;
+  font-weight: 600;
 }
 
 .generation-info .value {
-  font-size: 32px;
-  font-weight: bold;
-  color: #fff;
+  font-size: 30px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-1);
+  line-height: 1.2;
 }
 
 .control-buttons {
@@ -42,37 +46,39 @@
 .reset-button {
   padding: 12px 32px;
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: bold;
+  border-radius: var(--r-sm);
+  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s ease, transform 0.1s ease;
+  transition: all 0.18s ease;
 }
 
 .evolve-button {
-  background: linear-gradient(135deg, #4a9eff, #2a6eb8);
+  background: var(--hue-genetic);
   color: #fff;
 }
 
 .evolve-button:hover:not(:disabled) {
-  background: linear-gradient(135deg, #5aafff, #3a7ec8);
-  transform: translateY(-2px);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(124, 92, 246, 0.35);
+  filter: brightness(1.08);
 }
 
 .evolve-button:disabled {
-  background: #333;
-  color: #666;
+  background: var(--surface-3);
+  color: var(--text-3);
   cursor: not-allowed;
 }
 
 .reset-button {
-  background: #2a2a3e;
-  color: #fff;
-  border: 1px solid #444;
+  background: var(--surface-3);
+  color: var(--text-1);
+  border: 1px solid var(--border);
 }
 
 .reset-button:hover:not(:disabled) {
-  background: #3a3a4e;
+  background: var(--surface-hover);
+  border-color: var(--border-strong);
 }
 
 .reset-button:disabled {

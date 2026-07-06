@@ -13,22 +13,51 @@ import dnnlib
 import legacy
 
 
-class Individual:
-    """Represents an individual in the population."""
+# Faithful configuration of the interactive GA from Carvalho (2020),
+# "Exploring the latent space of StyleGAN2 through an interactive genetic
+# algorithm" (Latent Hiker): Z-space DNA, fitness-proportionate mating pool,
+# uniform crossover, gene-reset mutation at 1%, no elitism, no truncation.
+LATENT_HIKER_PRESET = {
+    'latent_space': 'z',
+    'crossover_enabled': True,
+    'crossover_method': 'uniform',
+    'mutation_enabled': True,
+    'mutation_method': 'reset',
+    'mutation_rate': 0.01,
+    'elitism_count': 0,
+    'selection_method': 'mating_pool',
+    'truncation_psi': 1.0,
+}
 
-    def __init__(self, w_vector: np.ndarray, generation: int = 0,
+
+class Individual:
+    """Represents an individual in the population.
+
+    Each StyleGAN image is an individual; its latent vector is its DNA.
+    Depending on the engine's `latent_space` config, the DNA lives in
+    Z-space (raw gaussian latent, as in Carvalho 2020 "Latent Hiker")
+    or W-space (post-mapping intermediate latent).
+    """
+
+    def __init__(self, dna: np.ndarray, generation: int = 0,
                  parents: Optional[Tuple[str, str]] = None):
         self.id = str(uuid.uuid4())[:8]
-        self.w_vector = w_vector  # Shape: (512,)
+        self.dna = dna  # Shape: (latent_dim,) — Z or W depending on engine config
         self.fitness = 5.0  # Default fitness (middle of 0-10)
         self.generation = generation
         self.parents = parents
         self.image_path = None
 
+    # Backwards-compat alias (older code and DNA JSON files use `w_vector`)
+    @property
+    def w_vector(self) -> np.ndarray:
+        return self.dna
+
     def to_dict(self) -> Dict:
         return {
             'id': self.id,
-            'w_vector': self.w_vector.tolist(),
+            'dna': self.dna.tolist(),
+            'w_vector': self.dna.tolist(),  # compat with existing frontend
             'fitness': self.fitness,
             'generation': self.generation,
             'parents': self.parents,
@@ -46,13 +75,16 @@ class GeneticEngine:
         self.population: List[Individual] = []
         self.generation = 0
         self.config = {
+            'latent_space': 'w',  # 'w' (post-mapping) or 'z' (raw latent, Latent Hiker)
             'crossover_enabled': True,
             'crossover_method': 'single_point',  # single_point, uniform, blend
             'mutation_enabled': True,
+            'mutation_method': 'gaussian',  # gaussian (perturb) or reset (resample gene, Latent Hiker)
             'mutation_rate': 0.1,
             'mutation_strength': 0.3,
             'elitism_count': 1,
-            'selection_method': 'roulette',  # roulette, tournament
+            'selection_method': 'roulette',  # roulette, tournament, mating_pool (Latent Hiker)
+            'truncation_psi': 0.7,  # Latent Hiker uses 1.0
             'image_size': 256  # 256, 512, or 1024
         }
         self.image_dir = 'exports/genetic'
@@ -67,33 +99,56 @@ class GeneticEngine:
             print(f'Model loaded. W dimension: {self.G.w_dim}')
         return self.G
 
-    def generate_random_w(self, seed: Optional[int] = None) -> np.ndarray:
-        """Generate a random W vector using the mapping network."""
+    def generate_random_dna(self, seed: Optional[int] = None) -> np.ndarray:
+        """Generate a random DNA vector in the configured latent space."""
         G = self.load_model()
 
         if seed is not None:
             torch.manual_seed(seed)
             np.random.seed(seed)
 
+        if self.config['latent_space'] == 'z':
+            # Latent Hiker: DNA is a raw Z vector sampled from N(0, 1)
+            return np.random.randn(G.z_dim).astype(np.float32)
+
         z = torch.randn(1, G.z_dim, device=self.device)
         c = torch.zeros(1, G.c_dim, device=self.device) if G.c_dim > 0 else None
 
         with torch.no_grad():
-            w = G.mapping(z, c, truncation_psi=0.7)
+            w = G.mapping(z, c, truncation_psi=self.config['truncation_psi'])
 
         # Return the first layer's W (they're all the same for fresh samples)
         return w[0, 0].cpu().numpy()
 
+    # Backwards-compat alias
+    def generate_random_w(self, seed: Optional[int] = None) -> np.ndarray:
+        return self.generate_random_dna(seed=seed)
+
+    def map_z_to_w(self, z_dna: np.ndarray) -> np.ndarray:
+        """Map a Z-space DNA to a single W vector (for export compatibility)."""
+        G = self.load_model()
+        z = torch.from_numpy(z_dna).float().unsqueeze(0).to(self.device)
+        c = torch.zeros(1, G.c_dim, device=self.device) if G.c_dim > 0 else None
+        with torch.no_grad():
+            w = G.mapping(z, c, truncation_psi=self.config['truncation_psi'])
+        return w[0, 0].cpu().numpy()
+
     def generate_image(self, individual: Individual) -> Image.Image:
-        """Generate an image from an individual's W vector."""
+        """Generate an image from an individual's DNA."""
         G = self.load_model()
         size = self.config['image_size']
 
-        w_tensor = torch.from_numpy(individual.w_vector).float().to(self.device)
-        w_tensor = w_tensor.unsqueeze(0).unsqueeze(0).repeat(1, G.num_ws, 1)
-
-        with torch.no_grad():
-            img = G.synthesis(w_tensor, noise_mode='const')
+        if self.config['latent_space'] == 'z':
+            # Full forward pass: Z -> mapping -> synthesis
+            z = torch.from_numpy(individual.dna).float().unsqueeze(0).to(self.device)
+            c = torch.zeros(1, G.c_dim, device=self.device) if G.c_dim > 0 else None
+            with torch.no_grad():
+                img = G(z, c, truncation_psi=self.config['truncation_psi'], noise_mode='const')
+        else:
+            w_tensor = torch.from_numpy(individual.dna).float().to(self.device)
+            w_tensor = w_tensor.unsqueeze(0).unsqueeze(0).repeat(1, G.num_ws, 1)
+            with torch.no_grad():
+                img = G.synthesis(w_tensor, noise_mode='const')
 
         img = (img[0].permute(1, 2, 0) * 127.5 + 128).clamp(0, 255).to(torch.uint8).cpu().numpy()
         img_pil = Image.fromarray(img, 'RGB')
@@ -118,8 +173,8 @@ class GeneticEngine:
         self.generation = 0
 
         for i in range(size):
-            w = self.generate_random_w(seed=seed + i if seed else None)
-            individual = Individual(w, generation=0)
+            dna = self.generate_random_dna(seed=seed + i if seed else None)
+            individual = Individual(dna, generation=0)
             self.generate_image(individual)
             self.population.append(individual)
 
@@ -148,27 +203,33 @@ class GeneticEngine:
         """Perform crossover based on configured method."""
         method = self.config['crossover_method']
 
-        if method == 'single_point':
-            return self.crossover_single_point(parent_a.w_vector, parent_b.w_vector)
-        elif method == 'uniform':
-            return self.crossover_uniform(parent_a.w_vector, parent_b.w_vector)
+        if method == 'uniform':
+            return self.crossover_uniform(parent_a.dna, parent_b.dna)
         elif method == 'blend':
-            return self.crossover_blend(parent_a.w_vector, parent_b.w_vector)
+            return self.crossover_blend(parent_a.dna, parent_b.dna)
         else:
-            return self.crossover_single_point(parent_a.w_vector, parent_b.w_vector)
+            return self.crossover_single_point(parent_a.dna, parent_b.dna)
 
-    def mutate(self, w_vector: np.ndarray) -> np.ndarray:
-        """Apply mutation to W vector."""
+    def mutate(self, dna: np.ndarray) -> np.ndarray:
+        """Apply mutation to a DNA vector.
+
+        Methods:
+        - 'gaussian': perturb selected genes with gaussian noise scaled by strength
+        - 'reset': replace selected genes with fresh N(0,1) samples (Latent Hiker)
+        """
         rate = self.config['mutation_rate']
-        strength = self.config['mutation_strength']
+        method = self.config['mutation_method']
 
         # Create mutation mask
-        mask = np.random.random(len(w_vector)) < rate
+        mask = np.random.random(len(dna)) < rate
+        mutated = dna.copy()
 
-        # Apply gaussian noise where mask is True
-        noise = np.random.randn(len(w_vector)) * strength
-        mutated = w_vector.copy()
-        mutated[mask] += noise[mask]
+        if method == 'reset':
+            mutated[mask] = np.random.randn(int(mask.sum())).astype(dna.dtype)
+        else:
+            strength = self.config['mutation_strength']
+            noise = np.random.randn(len(dna)) * strength
+            mutated[mask] += noise[mask]
 
         return mutated
 
@@ -196,12 +257,32 @@ class GeneticEngine:
         contestants = np.random.choice(self.population, size=min(tournament_size, len(self.population)), replace=False)
         return max(contestants, key=lambda ind: ind.fitness)
 
-    def select_parent(self) -> Individual:
+    def build_mating_pool(self) -> List[Individual]:
+        """Fitness-proportionate mating pool (Latent Hiker / Carvalho 2020).
+
+        Each individual enters the pool round(fitness) times, so a 10-rated
+        image is 10x more likely to reproduce than a 1-rated one. If every
+        rating is zero the pool is filled with brand-new random individuals,
+        restarting the search from a random region of the latent space.
+        """
+        pool = []
+        for ind in self.population:
+            pool.extend([ind] * int(round(ind.fitness)))
+
+        if not pool:
+            pool = [
+                Individual(self.generate_random_dna(), generation=self.generation)
+                for _ in range(len(self.population))
+            ]
+
+        return pool
+
+    def select_parent(self, mating_pool: Optional[List[Individual]] = None) -> Individual:
         """Select a parent based on configured method."""
         method = self.config['selection_method']
 
-        if method == 'roulette':
-            return self.selection_roulette()
+        if method == 'mating_pool' and mating_pool:
+            return mating_pool[np.random.randint(len(mating_pool))]
         elif method == 'tournament':
             return self.selection_tournament()
         else:
@@ -226,13 +307,18 @@ class GeneticEngine:
         sorted_pop = sorted(self.population, key=lambda x: x.fitness, reverse=True)
         elite = sorted_pop[:elitism_count]
 
+        # Build mating pool once per generation (Latent Hiker selection)
+        mating_pool = None
+        if self.config['selection_method'] == 'mating_pool':
+            mating_pool = self.build_mating_pool()
+
         # Create new population
         new_population = []
 
         # Keep elite
         for ind in elite:
             new_ind = Individual(
-                ind.w_vector.copy(),
+                ind.dna.copy(),
                 generation=self.generation,
                 parents=(ind.id, ind.id)  # Self-parent for elite
             )
@@ -240,22 +326,22 @@ class GeneticEngine:
 
         # Generate children
         while len(new_population) < population_size:
-            parent_a = self.select_parent()
-            parent_b = self.select_parent()
+            parent_a = self.select_parent(mating_pool)
+            parent_b = self.select_parent(mating_pool)
 
             # Crossover
             if self.config['crossover_enabled']:
-                child_w = self.crossover(parent_a, parent_b)
+                child_dna = self.crossover(parent_a, parent_b)
             else:
                 # Just copy from one parent
-                child_w = parent_a.w_vector.copy()
+                child_dna = parent_a.dna.copy()
 
             # Mutation
             if self.config['mutation_enabled']:
-                child_w = self.mutate(child_w)
+                child_dna = self.mutate(child_dna)
 
             child = Individual(
-                child_w,
+                child_dna,
                 generation=self.generation,
                 parents=(parent_a.id, parent_b.id)
             )
@@ -269,12 +355,24 @@ class GeneticEngine:
         return self.population
 
     def export_individual(self, individual_id: str) -> Optional[Dict]:
-        """Export an individual's data for saving."""
+        """Export an individual's data for saving.
+
+        Always includes a `w_vector` so exported DNA files stay compatible
+        with the Interpolation and W Editor pages. In Z-space mode the raw
+        DNA is exported as `dna` and the mapped W vector as `w_vector`.
+        """
         for ind in self.population:
             if ind.id == individual_id:
+                latent_space = self.config['latent_space']
+                if latent_space == 'z':
+                    w_vector = self.map_z_to_w(ind.dna).tolist()
+                else:
+                    w_vector = ind.dna.tolist()
                 return {
                     'id': ind.id,
-                    'w_vector': ind.w_vector.tolist(),
+                    'dna': ind.dna.tolist(),
+                    'latent_space': latent_space,
+                    'w_vector': w_vector,
                     'fitness': ind.fitness,
                     'generation': ind.generation,
                     'parents': ind.parents,
@@ -282,10 +380,10 @@ class GeneticEngine:
                 }
         return None
 
-    def import_individual(self, w_vector: List[float]) -> Individual:
-        """Import a W vector as a new individual."""
-        w_array = np.array(w_vector, dtype=np.float32)
-        individual = Individual(w_array, generation=self.generation)
+    def import_individual(self, dna: List[float]) -> Individual:
+        """Import a DNA vector (in the current latent space) as a new individual."""
+        dna_array = np.array(dna, dtype=np.float32)
+        individual = Individual(dna_array, generation=self.generation)
         self.generate_image(individual)
         return individual
 

@@ -13,13 +13,13 @@ import torch
 from PIL import Image
 import umap
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
 import dnnlib
 import legacy
-from genetic_engine import GeneticEngine
+from genetic_engine import GeneticEngine, LATENT_HIKER_PRESET
 from interpolation_engine import InterpolationEngine
 from stylegan_utils import generate_image_from_w
 from pydantic import BaseModel
@@ -37,6 +37,9 @@ class GeneticInitRequest(BaseModel):
     population_size: int = 9
     seed: Optional[int] = None
     image_size: int = 256
+    latent_space: str = 'w'  # 'w' (default) or 'z' (Latent Hiker)
+    truncation_psi: float = 0.7
+    preset: Optional[str] = None  # 'latent_hiker' applies Carvalho (2020) config
 
 
 class GeneticEvolveRequest(BaseModel):
@@ -47,10 +50,12 @@ class GeneticConfigRequest(BaseModel):
     crossover_enabled: Optional[bool] = None
     crossover_method: Optional[str] = None
     mutation_enabled: Optional[bool] = None
+    mutation_method: Optional[str] = None
     mutation_rate: Optional[float] = None
     mutation_strength: Optional[float] = None
     elitism_count: Optional[int] = None
     selection_method: Optional[str] = None
+    truncation_psi: Optional[float] = None
     image_size: Optional[int] = None
 
 
@@ -326,7 +331,7 @@ async def get_export(filename: str):
     filepath = os.path.join('exports', filename)
     if os.path.exists(filepath):
         return FileResponse(filepath, media_type="image/png")
-    return {"error": "File not found"}, 404
+    return JSONResponse(status_code=404, content={"error": "File not found"})
 
 
 # WebSocket Endpoint
@@ -365,7 +370,14 @@ async def genetic_init(request: GeneticInitRequest):
     model_path = os.path.join('models', request.model)
     _genetic_engine = GeneticEngine(model_path)
 
-    # Set image size before generating
+    # Apply preset (if any), then request-specific settings, before generating
+    if request.preset == 'latent_hiker':
+        _genetic_engine.update_config(LATENT_HIKER_PRESET)
+    else:
+        _genetic_engine.update_config({
+            'latent_space': request.latent_space,
+            'truncation_psi': request.truncation_psi,
+        })
     _genetic_engine.update_config({'image_size': request.image_size})
 
     population = _genetic_engine.initialize_population(
@@ -382,7 +394,7 @@ async def genetic_population():
     global _genetic_engine
 
     if _genetic_engine is None:
-        return {"error": "Genetic engine not initialized"}, 400
+        return JSONResponse(status_code=400, content={"error": "Genetic engine not initialized"})
 
     return _genetic_engine.get_population_state()
 
@@ -393,7 +405,7 @@ async def genetic_evolve(request: GeneticEvolveRequest):
     global _genetic_engine
 
     if _genetic_engine is None:
-        return {"error": "Genetic engine not initialized"}, 400
+        return JSONResponse(status_code=400, content={"error": "Genetic engine not initialized"})
 
     _genetic_engine.evolve(request.fitness)
 
@@ -406,7 +418,7 @@ async def genetic_config(request: GeneticConfigRequest):
     global _genetic_engine
 
     if _genetic_engine is None:
-        return {"error": "Genetic engine not initialized"}, 400
+        return JSONResponse(status_code=400, content={"error": "Genetic engine not initialized"})
 
     config_update = {k: v for k, v in request.model_dump().items() if v is not None}
     _genetic_engine.update_config(config_update)
@@ -420,12 +432,12 @@ async def genetic_export(request: GeneticExportRequest):
     global _genetic_engine
 
     if _genetic_engine is None:
-        return {"error": "Genetic engine not initialized"}, 400
+        return JSONResponse(status_code=400, content={"error": "Genetic engine not initialized"})
 
     data = _genetic_engine.export_individual(request.individual_id)
 
     if data is None:
-        return {"error": "Individual not found"}, 404
+        return JSONResponse(status_code=404, content={"error": "Individual not found"})
 
     return data
 
@@ -436,7 +448,7 @@ async def genetic_image(image_id: str):
     filepath = os.path.join('exports', 'genetic', f'{image_id}.png')
     if os.path.exists(filepath):
         return FileResponse(filepath, media_type="image/png")
-    return {"error": "Image not found"}, 404
+    return JSONResponse(status_code=404, content={"error": "Image not found"})
 
 
 # ============ Interpolation Endpoints ============
@@ -461,7 +473,7 @@ async def interpolation_preview(request: InterpolationPreviewRequest):
         )
         return {"frames": frame_urls}
     except Exception as e:
-        return {"error": str(e)}, 400
+        return JSONResponse(status_code=400, content={"error": str(e)})
 
 
 @app.get("/api/interpolation/preview/{preview_id}/{filename}")
@@ -470,7 +482,7 @@ async def get_preview_frame(preview_id: str, filename: str):
     filepath = os.path.join('exports', 'videos', f'preview_{preview_id}', filename)
     if os.path.exists(filepath):
         return FileResponse(filepath, media_type="image/png")
-    return {"error": "Frame not found"}, 404
+    return JSONResponse(status_code=404, content={"error": "Frame not found"})
 
 
 @app.get("/api/interpolation/video/{filename}")
@@ -481,7 +493,7 @@ async def get_interpolation_video(filename: str):
         if filename.endswith('.gif'):
             return FileResponse(filepath, media_type="image/gif")
         return FileResponse(filepath, media_type="video/mp4")
-    return {"error": "Video not found"}, 404
+    return JSONResponse(status_code=404, content={"error": "Video not found"})
 
 
 @app.websocket("/ws/interpolation")
@@ -560,7 +572,7 @@ async def generate_from_w_vector(request: WVectorRequest):
 
     # Validate W vector length
     if len(request.w_vector) != 512:
-        return {"error": f"W vector must have 512 values, got {len(request.w_vector)}"}, 400
+        return JSONResponse(status_code=400, content={"error": f"W vector must have 512 values, got {len(request.w_vector)}"})
 
     # Convert to numpy array
     w_array = np.array(request.w_vector, dtype=np.float32)
@@ -587,7 +599,7 @@ async def get_wvector_image(filename: str):
     filepath = os.path.join('exports', 'wvector', filename)
     if os.path.exists(filepath):
         return FileResponse(filepath, media_type="image/png")
-    return {"error": "Image not found"}, 404
+    return JSONResponse(status_code=404, content={"error": "Image not found"})
 
 
 if __name__ == "__main__":

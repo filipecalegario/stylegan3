@@ -1,14 +1,18 @@
 .export-panel {
-  background: #1a1a2e;
-  border-radius: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
   padding: 16px;
   margin: 16px 0;
 }
 
 .export-panel h3 {
   margin: 0 0 16px 0;
-  color: #fff;
-  font-size: 16px;
+  color: var(--text-1);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
 
 .export-panel.empty {
@@ -17,102 +21,104 @@
 }
 
 .empty-message {
-  color: #666;
-  font-size: 14px;
+  color: var(--text-3);
+  font-size: 13.5px;
   margin: 0;
 }
 
 .favorites-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   max-height: 400px;
   overflow-y: auto;
 }
 
 .favorite-item {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
+  gap: 8px 12px;
   padding: 8px;
-  background: #2a2a3e;
-  border-radius: 8px;
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  transition: border-color 0.15s ease;
+}
+
+.favorite-item:hover {
+  border-color: var(--border-strong);
 }
 
 .favorite-thumb {
-  width: 50px;
-  height: 50px;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
   object-fit: cover;
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
 .favorite-info {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
 .favorite-id {
-  font-family: monospace;
-  color: #fff;
+  font-family: var(--font-mono);
+  color: var(--text-1);
   font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .favorite-gen {
-  color: #666;
+  color: var(--text-3);
   font-size: 11px;
 }
 
+/* Give the buttons their own full-width row so they never spill out of
+   the narrow (300px) sidebar panel. */
 .favorite-actions {
   display: flex;
+  flex: 1 0 100%;
+  justify-content: flex-end;
   gap: 6px;
 }
 
 .download-btn,
 .remove-btn {
-  padding: 4px 8px;
-  border: none;
-  border-radius: 4px;
+  padding: 5px 9px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
   font-size: 11px;
+  font-weight: 500;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: all 0.15s ease;
 }
 
 .download-btn {
-  background: #3a3a4e;
-  color: #fff;
+  background: var(--surface-hover);
+  color: var(--text-1);
 }
 
 .download-btn:hover {
-  background: #4a9eff;
-}
-
-.remove-btn {
-  background: #3a3a4e;
-  color: #ff6666;
-}
-
-.remove-btn:hover {
-  background: #ff4444;
+  background: var(--accent-2);
+  border-color: var(--accent-2);
   color: #fff;
 }
 
-/* Scrollbar styling */
-.favorites-list::-webkit-scrollbar {
-  width: 6px;
+.remove-btn {
+  background: transparent;
+  color: var(--danger);
+  border-color: rgba(248, 113, 113, 0.3);
 }
 
-.favorites-list::-webkit-scrollbar-track {
-  background: #1a1a2e;
-  border-radius: 3px;
-}
-
-.favorites-list::-webkit-scrollbar-thumb {
-  background: #333;
-  border-radius: 3px;
-}
-
-.favorites-list::-webkit-scrollbar-thumb:hover {
-  background: #444;
+.remove-btn:hover {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
 }

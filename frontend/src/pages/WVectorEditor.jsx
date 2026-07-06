@@ -55,8 +55,8 @@ export function WVectorEditor() {
   return (
     <div className="wvector-editor">
       <header className="editor-header">
-        <h1>W Vector Editor</h1>
-        <p>Paint the 512 dimensions to create custom images</p>
+        <h1>Genotype Editor</h1>
+        <p>Paint 512 genes and watch the phenotype emerge.</p>
       </header>
 
       {error && <div className="error-banner">{error}</div>}
