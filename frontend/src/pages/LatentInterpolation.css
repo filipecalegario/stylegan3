@@ -1,40 +1,26 @@
 .latent-interpolation {
-  min-height: 100vh;
-  background: #0f0f1a;
-  color: #fff;
-  padding: 20px;
+  min-height: calc(100vh - 53px);
+  padding: 0 20px 40px;
 }
 
 .interpolation-header {
   text-align: center;
-  margin-bottom: 30px;
+  padding: 28px 0 4px;
+  margin-bottom: 26px;
 }
 
 .interpolation-header h1 {
-  margin: 0;
-  font-size: 28px;
-  background: linear-gradient(135deg, #a855f7, #4a9eff);
+  letter-spacing: -0.015em;
+  background: var(--hue-interp);
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
   background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .interpolation-header p {
   margin: 8px 0 0;
-  color: #666;
+  color: var(--text-3);
   font-size: 14px;
-}
-
-.error-banner {
-  background: #ff4444;
-  color: #fff;
-  padding: 12px 20px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  text-align: center;
-  max-width: 1200px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .interpolation-layout {
@@ -52,31 +38,24 @@
 }
 
 .model-selector {
-  background: #1a1a2e;
-  border-radius: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
   padding: 20px;
 }
 
 .model-selector label {
   display: block;
-  color: #aaa;
-  font-size: 14px;
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 500;
   margin-bottom: 8px;
 }
 
 .model-selector select {
   width: 100%;
   padding: 12px;
-  background: #2a2a3e;
-  border: 1px solid #333;
-  border-radius: 8px;
-  color: #fff;
   font-size: 14px;
-}
-
-.model-selector select:focus {
-  outline: none;
-  border-color: #4a9eff;
 }
 
 .action-buttons {
@@ -90,21 +69,22 @@
 .cancel-btn {
   padding: 14px 24px;
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
+  border-radius: var(--r-sm);
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.18s ease;
 }
 
 .preview-btn {
-  background: #2a2a3e;
-  color: #fff;
-  border: 1px solid #444;
+  background: var(--surface-3);
+  color: var(--text-1);
+  border: 1px solid var(--border);
 }
 
 .preview-btn:hover:not(:disabled) {
-  background: #3a3a4e;
+  background: var(--surface-hover);
+  border-color: var(--border-strong);
 }
 
 .preview-btn:disabled {
@@ -113,18 +93,19 @@
 }
 
 .generate-btn {
-  background: linear-gradient(135deg, #a855f7, #4a9eff);
+  background: var(--hue-interp);
   color: #fff;
 }
 
 .generate-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(168, 85, 247, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(168, 85, 247, 0.35);
+  filter: brightness(1.08);
 }
 
 .generate-btn:disabled {
-  background: #333;
-  color: #666;
+  background: var(--surface-3);
+  color: var(--text-3);
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
@@ -132,12 +113,12 @@
 
 .cancel-btn {
   background: transparent;
-  color: #ff6666;
-  border: 1px solid #ff6666;
+  color: var(--danger);
+  border: 1px solid rgba(248, 113, 113, 0.4);
 }
 
 .cancel-btn:hover {
-  background: rgba(255, 102, 102, 0.1);
+  background: rgba(248, 113, 113, 0.1);
 }
 
 .interpolation-main {

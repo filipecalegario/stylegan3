@@ -59,8 +59,8 @@ export function LatentInterpolation() {
   return (
     <div className="latent-interpolation">
       <header className="interpolation-header">
-        <h1>Latent Space Interpolation</h1>
-        <p>Create smooth transition videos between DNA keyframes</p>
+        <h1>Interpolation</h1>
+        <p>Morph between genotypes into one continuous sequence.</p>
       </header>
 
       {error && (

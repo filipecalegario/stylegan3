@@ -6,15 +6,24 @@
 }
 
 .latent-explorer .header {
-  background: #16213e;
   padding: 1rem 2rem;
-  border-bottom: 1px solid #0f3460;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-1);
 }
 
 .latent-explorer .header h1 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #e94560;
+  letter-spacing: -0.02em;
+  background: var(--hue-explorer);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+.latent-explorer .header p {
+  margin-top: 5px;
+  color: var(--text-3);
+  font-size: 13px;
 }
 
 .latent-explorer .main {
@@ -24,11 +33,11 @@
 }
 
 .latent-explorer .sidebar {
-  width: 320px;
-  background: #16213e;
+  width: 330px;
+  background: var(--surface-1);
   padding: 1.5rem;
   overflow-y: auto;
-  border-right: 1px solid #0f3460;
+  border-right: 1px solid var(--border);
 }
 
 .latent-explorer .content {
@@ -37,11 +46,10 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: #0f0f1a;
 }
 
 .latent-explorer .placeholder {
-  color: #666;
+  color: var(--text-3);
   text-align: center;
   padding: 2rem;
 }

@@ -64,7 +64,8 @@ export function LatentExplorer() {
   return (
     <div className="latent-explorer">
       <header className="header">
-        <h1>StyleGAN3 Latent Space Explorer</h1>
+        <h1>Latent Atlas</h1>
+        <p>A 2-D map of the model's latent space, sampled and rendered.</p>
       </header>
 
       <main className="main">

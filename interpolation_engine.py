@@ -64,8 +64,25 @@ class InterpolationEngine:
         else:
             x = np.arange(num_keyframes)
 
+        # scipy.interpolate.interp1d needs enough points for the spline order:
+        # cubic (order 3) needs >= 4 points, quadratic (order 2) needs >= 3.
+        # Gracefully downgrade instead of raising a cryptic ValueError when the
+        # user has too few keyframes (e.g. 2 DNA files with the default cubic).
+        n_points = len(x)
+        min_points = {'cubic': 4, 'quadratic': 3, 'linear': 2, 'nearest': 1}
+        effective_kind = kind
+        if n_points < min_points.get(kind, 2):
+            if n_points >= 3:
+                effective_kind = 'quadratic'
+            else:
+                effective_kind = 'linear'
+            print(
+                f"Interpolation: '{kind}' needs {min_points.get(kind, 2)} keyframes "
+                f"but only {n_points} available; falling back to '{effective_kind}'."
+            )
+
         # Create interpolation function
-        interp = scipy.interpolate.interp1d(x, ws, kind=kind, axis=0)
+        interp = scipy.interpolate.interp1d(x, ws, kind=effective_kind, axis=0)
 
         return interp, num_keyframes
 

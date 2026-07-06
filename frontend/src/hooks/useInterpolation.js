@@ -103,14 +103,18 @@ export function useInterpolation() {
         })
       });
 
-      if (!response.ok) {
-        throw new Error(`Preview failed: ${response.statusText}`);
-      }
-
       const data = await response.json();
 
-      if (data.error) {
+      if (!response.ok) {
+        throw new Error(data?.error || `Preview failed: ${response.statusText}`);
+      }
+
+      if (data?.error) {
         throw new Error(data.error);
+      }
+
+      if (!Array.isArray(data?.frames)) {
+        throw new Error('Preview response did not include any frames');
       }
 
       // Convert relative URLs to absolute

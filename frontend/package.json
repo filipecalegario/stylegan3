@@ -4,7 +4,9 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently -n api,web -c blue,magenta --kill-others \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:api": "cd .. && conda run --no-capture-output -n stylegan3 python api_server.py",
+    "dev:web": "vite",
     "build": "vite build",
     "preview": "vite preview"
   },
@@ -15,6 +17,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",
+    "concurrently": "^8.2.2",
     "vite": "^5.0.0"
   }
 }
